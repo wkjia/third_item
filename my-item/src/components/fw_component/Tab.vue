@@ -8,11 +8,11 @@
             lass="title" v-for="(n,index) in arr" :key="index" v-text="n.title"
 
             ></router-link>
-            <li class="title2">
-                <select>
-                    <option v-for="(item,num) in sort" :key='num' :value ="item.time" v-text="item.time+'最热'"></option>
+            <router-link to='hot'  class="title2" tag='li'>
+                <select v-model="selected" @click="xiala(selected);query(selected);fullscreen()" >
+                    <option   :selected='item.default' v-for="(item,num) in sort" :key='num' v-bind:value="item.value" v-text="item.time+'最热'"></option>
                 </select>
-            </li>
+            </router-link>
         </ul>
     </div>
 </template>
@@ -31,6 +31,8 @@ Vue.use(Loading, {
 export default {
   data: function() {
     return {
+      //下拉列表
+      selected: 1,
       //加载指示器
       loading1: false,
       loading2: false,
@@ -39,6 +41,7 @@ export default {
       qita:1,
       page: 0,
       num:0,
+      hot_num:'',
       arr: [
         {
           title: "我的关注",
@@ -58,10 +61,10 @@ export default {
         }
       ],
       sort: [
-        { time: "24小时" },
-        { time: "3天" },
-        { time: "7天" },
-        { time: "3个月" }
+        { time: "24小时",link:'hot', value:0},
+        { time: "3天" ,link:'hot',default:'selected',value:1},
+        { time: "7天",link:'hot', value:2},
+        { time: "3个月",link:'hot', value:3}
       ]
     };
   },
@@ -87,7 +90,32 @@ export default {
     //传递参数
     chuancan(index){
       sessionStorage.setItem('index',index)
-    }
+    },
+    xiala(value){
+      // console.log(value)
+      sessionStorage.setItem('value',value)
+    },
+    query(selected) {
+        var self = this;
+        self.num++;
+        // console.log('hot')
+        $.ajax({
+          url: "http://localhost:3000/hot",
+          type: "GET",
+          data: {
+            num: 1,
+            page:selected
+          },
+          success(data) {
+            var data6 = JSON.parse(data);
+            sessionStorage.setItem('option',data)
+            // console.log(data6);
+            self.total = self.total.concat(data6.data.items);
+            // console.log(self.total)
+          }
+        });
+
+    },
     
   },
   
